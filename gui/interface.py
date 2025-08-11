@@ -1,23 +1,40 @@
 import tkinter as tk
+from gui.client import PageClient
+from gui.paiement import PagePaiement
 
 def lancer_interface():
-    fenetre = tk.Tk()
-    fenetre.title("Logiciel de Paie Cyber")
-    fenetre.geometry("900x700")  # ← Taille personnalisée
+    app = Application()
+    app.mainloop()
 
-    tk.Label(fenetre, text="Nom du client").pack()
-    entry_nom = tk.Entry(fenetre)
-    entry_nom.pack()
+class Application(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Logiciel de Paie Cyber")
+        self.geometry("800x600")
 
-    tk.Label(fenetre, text="Durée (minutes)").pack()
-    entry_duree = tk.Entry(fenetre)
-    entry_duree.pack()
+        # Dictionnaire de pages
+        self.pages = {}
 
-    def valider():
-        nom = entry_nom.get()
-        duree = entry_duree.get()
-        print(f"Client: {nom}, Durée: {duree} minutes")
+        container = tk.Frame(self)
+        container.pack(fill="both", expand=True)
 
-    tk.Button(fenetre, text="Valider", command=valider).pack()
+        for Page in (PageAccueil, PageClient, PagePaiement):
+            page_name = Page.__name__
+            frame = Page(parent=container, controller=self)
+            self.pages[page_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
 
-    fenetre.mainloop()
+        self.afficher_page("PageAccueil")
+
+    def afficher_page(self, nom_page):
+        page = self.pages[nom_page]
+        page.tkraise()
+
+class PageAccueil(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+
+        tk.Label(self, text="Bienvenue au Logiciel de Paie Cyber", font=("Arial", 20)).pack(pady=20)
+        tk.Button(self, text="Gérer les Clients", command=lambda: controller.afficher_page("PageClient")).pack(pady=10)
+        tk.Button(self, text="Gestion de Paie", command=lambda: controller.afficher_page("PagePaiement")).pack(pady=10)
